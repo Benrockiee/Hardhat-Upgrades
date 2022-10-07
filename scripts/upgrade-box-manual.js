@@ -26,11 +26,19 @@ async function main() {
     }
 
     // Upgrade!
-    // Not "the hardhat-deploy way"
+    // Not "the hardhat-deploy way", so we first get thhe BoxProxyAdmin contract
     const boxProxyAdmin = await ethers.getContract("BoxProxyAdmin")
+    
+    //Here we get the actual proxy which is our transparent proxy
     const transparentProxy = await ethers.getContract("Box_Proxy")
+    
+    // Here we call the upgrade function on our BoxProxyAdmin which calls it on our transparent proxy
+    //which will change the implementation from BoxV1 to BoxV2
     const upgradeTx = await boxProxyAdmin.upgrade(transparentProxy.address, boxV2.address)
+    
     await upgradeTx.wait(1)
+    //Here we get the Boxv2 Abi and load it at transparentProxy address and this swill have the abi of BoxV2
+    
     const proxyBox = await ethers.getContractAt("BoxV2", transparentProxy.address)
     const version = await proxyBox.version()
     console.log(version.toString())
